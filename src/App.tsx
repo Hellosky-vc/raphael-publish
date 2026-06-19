@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { PenLine, Eye } from 'lucide-react';
+import { PenLine, Eye, Shirt } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { md, preprocessMarkdown, applyTheme } from './lib/markdown';
 import { markElementIndexes } from './lib/markdownIndexer';
@@ -13,9 +13,13 @@ import ThemeSelector from './components/ThemeSelector';
 import Toolbar from './components/Toolbar';
 import EditorPanel from './components/EditorPanel';
 import PreviewPanel from './components/PreviewPanel';
+import VirtualTryOn from './components/VirtualTryOn';
+
+type AppTab = 'editor' | 'tryon';
 
 export default function App() {
     const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light');
+    const [activeTab, setActiveTab] = useState<AppTab>('tryon');
     const [markdownInput, setMarkdownInput] = useState<string>(defaultContent);
     const [renderedHtml, setRenderedHtml] = useState<string>('');
     const [activeTheme, setActiveTheme] = useState(THEMES[0].id);
@@ -256,25 +260,47 @@ export default function App() {
 
             <Header themeMode={themeMode} onToggleTheme={toggleTheme} />
 
-            {/* 移动端 Tab 切换 */}
-            <div className="md:hidden glass-toolbar flex items-center z-[90]">
+            {/* App Tab 切换 */}
+            <div className="glass-toolbar flex items-center z-[90] border-b border-[#00000010] dark:border-[#ffffff10]">
                 <button
-                    data-testid="tab-editor"
-                    onClick={() => setActivePanel('editor')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3 text-[13px] font-semibold transition-colors border-b-2 ${activePanel === 'editor' ? 'text-[#0066cc] dark:text-[#0a84ff] border-[#0066cc] dark:border-[#0a84ff]' : 'text-[#86868b] dark:text-[#a1a1a6] border-transparent'}`}
+                    onClick={() => setActiveTab('tryon')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 text-[13px] font-semibold transition-colors border-b-2 ${activeTab === 'tryon' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-gray-700'}`}
+                >
+                    <Shirt size={15} />
+                    虚拟试衣
+                </button>
+                <button
+                    onClick={() => setActiveTab('editor')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 text-[13px] font-semibold transition-colors border-b-2 ${activeTab === 'editor' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-gray-700'}`}
                 >
                     <PenLine size={15} />
-                    编辑
-                </button>
-                <button
-                    data-testid="tab-preview"
-                    onClick={() => setActivePanel('preview')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3 text-[13px] font-semibold transition-colors border-b-2 ${activePanel === 'preview' ? 'text-[#0066cc] dark:text-[#0a84ff] border-[#0066cc] dark:border-[#0a84ff]' : 'text-[#86868b] dark:text-[#a1a1a6] border-transparent'}`}
-                >
-                    <Eye size={15} />
-                    预览
+                    编辑器
                 </button>
             </div>
+
+            {activeTab === 'tryon' ? (
+                <VirtualTryOn />
+            ) : (
+                <>
+                    {/* 移动端 Tab 切换 */}
+                    <div className="md:hidden glass-toolbar flex items-center z-[90]">
+                        <button
+                            data-testid="tab-editor"
+                            onClick={() => setActivePanel('editor')}
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 text-[13px] font-semibold transition-colors border-b-2 ${activePanel === 'editor' ? 'text-[#0066cc] dark:text-[#0a84ff] border-[#0066cc] dark:border-[#0a84ff]' : 'text-[#86868b] dark:text-[#a1a1a6] border-transparent'}`}
+                        >
+                            <PenLine size={15} />
+                            编辑
+                        </button>
+                        <button
+                            data-testid="tab-preview"
+                            onClick={() => setActivePanel('preview')}
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 text-[13px] font-semibold transition-colors border-b-2 ${activePanel === 'preview' ? 'text-[#0066cc] dark:text-[#0a84ff] border-[#0066cc] dark:border-[#0a84ff]' : 'text-[#86868b] dark:text-[#a1a1a6] border-transparent'}`}
+                        >
+                            <Eye size={15} />
+                            预览
+                        </button>
+                    </div>
 
             {/* 排版设置 & 工具栏 (桌面端) */}
             <div className={`glass-toolbar hidden md:grid grid-cols-1 ${gridLayoutClass()} px-0 z-[90] transition-all duration-500`}>
@@ -336,6 +362,8 @@ export default function App() {
                     />
                 </div>
             </main>
+                </>
+            )}
 
         </div>
     );
